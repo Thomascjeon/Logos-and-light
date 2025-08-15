@@ -1,14 +1,14 @@
 /**
  * Topics.tsx
  * Topic overview grid, optionally responding to a query param for focus.
+ * Removed stray "Customize images" button per request (route no longer exists).
  */
 
 import { useEffect, useMemo, useState } from 'react'
 import Layout from '../components/Layout'
 import TopicCard from '../components/TopicCard'
-import { useLocation, Link } from 'react-router'
+import { useLocation } from 'react-router'
 import { Separator } from '../components/ui/separator'
-import { Button } from '../components/ui/button'
 
 /**
  * parseQuery
@@ -60,16 +60,11 @@ export default function TopicsPage() {
   return (
     <Layout>
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-semibold">Topics</h1>
-            <p className="mt-2 text-muted-foreground text-sm">
-              Browse key areas where philosophical questions and Christian wisdom converge.
-            </p>
-          </div>
-          <Link to="/settings/imagery">
-            <Button variant="outline" className="bg-transparent">Customize images</Button>
-          </Link>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold">Topics</h1>
+          <p className="mt-2 text-muted-foreground text-sm">
+            Browse key areas where philosophical questions and Christian wisdom converge.
+          </p>
         </div>
 
         <Separator className="my-6" />
