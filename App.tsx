@@ -23,6 +23,7 @@ import ContentEditorPage from './pages/ContentEditor'
 import ConnectLinkCleanup from './components/ConnectLinkCleanup'
 import HeadSEO from './components/HeadSEO'
 import WWWEnforcer from './components/WWWEnforcer'
+import AdminGate from './components/AdminGate'
 
 /**
  * App
@@ -59,10 +60,9 @@ export default function App() {
             <Route path="/questions" element={<QuestionsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
-            {/* Admin/editor page for imagery (no navbar link). Use ?key=... if adminEditKey is set. */}
-            <Route path="/imagery" element={<ImageryEditorPage />} />
-            {/* Local content editor for article text */}
-            <Route path="/content" element={<ContentEditorPage />} />
+            {/* Admin/editor pages require a key via AdminGate */}
+            <Route path="/imagery" element={<AdminGate><ImageryEditorPage /></AdminGate>} />
+            <Route path="/content" element={<AdminGate><ContentEditorPage /></AdminGate>} />
           </Routes>
         </HashRouter>
       </ThemeProvider>

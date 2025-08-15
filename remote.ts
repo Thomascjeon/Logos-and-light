@@ -69,8 +69,9 @@ export const remoteUpdateConfig: RemoteUpdateConfig = {
   headers: undefined,
 }
 
-/** Admin edit key (optional)
- * If set to a non-empty string, the imagery editor at /imagery requires a query ?key=YOUR_KEY to unlock editing on public.
- * Leave empty to allow editing without a key (not recommended on public).
+/** Admin edit key (required)
+ * Both the Imagery and Content editors are protected by this key.
+ * Open those pages as /#/imagery?key=YOUR_KEY or /#/content?key=YOUR_KEY.
+ * Change the value below to your own secret string.
  */
-export const adminEditKey = ''
+export const adminEditKey = 'admin'

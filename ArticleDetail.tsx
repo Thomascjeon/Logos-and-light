@@ -2,6 +2,7 @@
  * ArticleDetail.tsx
  * Detailed article view with breadcrumb, optional hero image, body, and quote.
  * Respects UI preferences, image overrides, and content overrides.
+ * Editor action buttons (Customize image/Edit text) removed per request.
  */
 
 import Layout from '../components/Layout'
@@ -73,12 +74,9 @@ export default function ArticleDetailPage() {
                 Back
               </Button>
             </Link>
-            <Link to={`/imagery?article=${core.id}`}>
-              <Button variant="outline" className="bg-transparent">Customize image</Button>
-            </Link>
-            <Link to={`/content?article=${core.id}`}>
-              <Button variant="outline" className="bg-transparent">Edit text</Button>
-            </Link>
+            {/* Editor action buttons removed per request:
+                - Customize image (/imagery?article=...)
+                - Edit text (/content?article=...) */}
           </div>
         </div>
 
