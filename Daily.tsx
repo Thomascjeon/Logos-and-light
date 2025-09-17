@@ -1,6 +1,7 @@
 /**
  * Daily.tsx
  * Daily Reflection page that generates contemplative content deterministically by date and theme.
+ * Now includes a top hero banner using the provided Daily Wisdom image (shown only if images are enabled).
  */
 
 import { useMemo, useState } from 'react'
@@ -11,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { CalendarDays, Copy, RefreshCw } from 'lucide-react'
 import { getReflectionForDate, themes, humanizeTheme, type ReflectionTheme } from '../lib/contentEngine'
+import DailyHero from '../components/DailyHero'
+import { useUIPrefs } from '../contexts/UIPrefsContext'
 
 /**
  * parseQuery
@@ -49,6 +52,7 @@ function ThemePill({ theme, active, onClick }: { theme: ReflectionTheme; active:
 export default function DailyPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { prefs } = useUIPrefs()
   const { t } = useMemo(() => parseQuery(location.search), [location.search])
 
   const theme: ReflectionTheme = (t && themes.includes(t) ? t : 'mindfulness')
@@ -92,6 +96,16 @@ export default function DailyPage() {
 
   return (
     <Layout>
+      {/* Daily Wisdom hero (respects UI images preference) */}
+      {prefs.images === 'on' && (
+        <DailyHero
+          src="https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/b6f6f76d-3ece-4003-b2c2-7db2f74bfe02.png"
+          alt="Daily Wisdom"
+          title="Daily Wisdom"
+          caption="Begin in stillness; let the light of Christ guide your attention today."
+        />
+      )}
+
       <section className="mx-auto max-w-3xl px-4 py-10">
         <div className="flex items-center gap-3">
           <CalendarDays className="size-5 text-primary" />

@@ -18,7 +18,7 @@ import type { TopicKey } from '../lib/articleEngine'
  * Set per user request: global image override points to the uploaded “vase” artwork.
  */
 export const siteWideImageOverride: string | null =
-  'https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/40a7f191-0501-4b2f-9f2f-478e08a0354e.png'
+  'https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/10e3a101-c2d9-400d-826b-47718af421f3.png'
 
 /**
  * topicDefaultImages

@@ -1,168 +1,124 @@
 /**
  * Home.tsx
- * The landing page with hero, quote carousel, featured content, topics, and practice links.
+ * Beautiful, content-rich landing page with clear entrances to key sections.
+ * Uses Layout for site chrome and accessible, responsive Tailwind UI.
  */
 
-import { useMemo } from 'react'
-import Layout from '../components/Layout'
-import { Button } from '../components/ui/button'
-import { Separator } from '../components/ui/separator'
-import { ArrowRight, Compass, Heart, Wind, BookOpen } from 'lucide-react'
-import QuoteCarousel from '../components/QuoteCarousel'
-import ArticleCard, { Article } from '../components/ArticleCard'
-import TopicCard from '../components/TopicCard'
 import { Link } from 'react-router'
-import { listArticlesForDate } from '../lib/articleEngine'
-import DailyPreview from '../components/DailyPreview'
+import Layout from '../components/Layout'
+import { siteConfig } from '../config/site'
 
 /**
  * HomePage
- * Composes the homepage hero, quotes, daily preview, featured articles, topics grid.
+ * Presents a hero, quick navigation, and featured sections with visual imagery.
  */
 export default function HomePage() {
-  /**
-   * Featured articles:
-   * - Use generated articles for today so IDs are valid (topic-YYYYMMDD-index).
-   * - This ensures per-article and per-topic image overrides apply automatically.
-   */
-  const featuredArticles: Article[] = useMemo(() => {
-    const today = new Date()
-    // Generate 1 per topic, then take the first 3 to feature.
-    // listArticlesForDate returns items with correct paths (/articles/:id).
-    return listArticlesForDate(today, 1).slice(0, 3)
-  }, [])
+  const features = [
+    {
+      title: 'Faith & Reason',
+      desc: 'Essays exploring harmony between philosophy and Christian thought.',
+      to: '/articles',
+      src: 'https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/858c3a4e-e04f-490d-8c19-0dcc55f0ffe8.png',
+    },
+    {
+      title: 'Daily Wisdom',
+      desc: 'Short reflections and meditative quotations for the day.',
+      to: '/daily',
+      src: 'https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/b6f6f76d-3ece-4003-b2c2-7db2f74bfe02.png',
+    },
+    {
+      title: 'Study Resources',
+      desc: 'Reading guides and tools for personal and group formation.',
+      to: '/resources',
+      src: 'https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/166d1645-93d1-46ea-8b6c-f7e1ab81b8a0.png',
+    },
+  ]
+
+  const quickLinks = [
+    { name: 'Articles', to: '/articles' },
+    { name: 'Topics', to: '/topics' },
+    { name: 'Daily', to: '/daily' },
+    { name: 'Mindfulness', to: '/mindfulness' },
+    { name: 'Questions', to: '/questions' },
+    { name: 'About', to: '/about' },
+  ]
 
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative">
-        <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-indigo-100/70 via-transparent to-transparent dark:from-indigo-900/20"
-          aria-hidden
-        />
-        <div className="mx-auto max-w-6xl px-4 py-16 md:py-24">
-          <div className="grid gap-10 md:grid-cols-2 md:items-center">
+      <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted">
+        <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+          <div className="grid items-center gap-10 md:grid-cols-2">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                Where <span className="bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500 bg-clip-text text-transparent">philosophy</span> meets{' '}
-                <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 bg-clip-text text-transparent">Christian thought</span>
+              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
+                {siteConfig.name}
               </h1>
-              <p className="mt-4 text-muted-foreground text-base md:text-lg">
-                Logos &amp; Light is a contemplative space for essays, reflections, and resources at the
-                intersection of classical philosophy and the Christian tradition.
+              <p className="mt-4 text-base md:text-lg text-muted-foreground">
+                {siteConfig.tagline}
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link to="/articles">
-                  <Button className="gap-2">
-                    Read Articles
-                    <ArrowRight className="size-4" />
-                  </Button>
+                <Link
+                  to="/articles"
+                  className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-primary-foreground shadow hover:opacity-90"
+                >
+                  Explore Articles
                 </Link>
-                <Link to="/topics">
-                  <Button variant="outline" className="bg-transparent gap-2">
-                    Explore Topics
-                    <Compass className="size-4" />
-                  </Button>
-                </Link>
-                <Link to="/daily">
-                  <Button variant="outline" className="bg-transparent gap-2">
-                    Daily Reflection
-                    <Heart className="size-4" />
-                  </Button>
-                </Link>
-                <Link to="/resources">
-                  <Button variant="outline" className="bg-transparent gap-2">
-                    Resources
-                    <BookOpen className="size-4" />
-                  </Button>
+                <Link
+                  to="/topics"
+                  className="inline-flex items-center rounded-md border px-4 py-2 hover:bg-accent hover:text-accent-foreground"
+                >
+                  Browse Topics
                 </Link>
               </div>
             </div>
 
-            <div className="relative">
-              <QuoteCarousel />
+            <div className="relative aspect-square w-full overflow-hidden rounded-xl border">
+              <img
+                src="https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/81a4db50-dd9d-428a-9300-f40323e2891c.png"
+                alt="Abstract aurora artwork"
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Daily Reflection Preview */}
-      <section className="mx-auto max-w-6xl px-4 pb-4">
-        <h2 className="text-xl md:text-2xl font-semibold">Today’s Daily Reflection</h2>
-        <Separator className="my-6" />
-        <DailyPreview />
-      </section>
-
-      {/* Featured Articles */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl md:text-2xl font-semibold">Featured readings</h2>
-          <Link to="/articles" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-            View all
-            <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-        <Separator className="my-6" />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredArticles.map(a => (
-            <ArticleCard key={a.id} article={a} />
+      {/* Quick links */}
+      <section className="mx-auto max-w-6xl px-4 py-10">
+        <div className="flex flex-wrap gap-2">
+          {quickLinks.map((q) => (
+            <Link
+              key={q.name}
+              to={q.to}
+              className="rounded-full border px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              {q.name}
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* Practice & Reflection (Daily card previously removed) */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="text-xl md:text-2xl font-semibold">Practice &amp; Reflection</h2>
-        <Separator className="my-6" />
-        {/* With a single item, use a single-column grid for full-width presentation */}
-        <div className="grid gap-5">
-          <Link to="/mindfulness" className="group relative overflow-hidden rounded-xl border">
-            <div className="absolute inset-0">
-              <img src="https://pub-cdn.sider.ai/u/U0AWH6J28LO/web-coder/6896d87314f019f2a83e5a14/resource/85a335e8-365f-4bc2-9b15-b0ce51518115.png" className="object-cover h-full w-full" />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent group-hover:opacity-80 transition-opacity" />
-            <div className="relative p-5 h-40 flex items-end">
-              <div className="text-white drop-shadow">
-                <div className="flex items-center gap-2">
-                  <Wind className="size-4" />
-                  <p className="font-medium">Mindfulness &amp; Christian Prayer</p>
-                </div>
-                <p className="text-xs text-white/90 mt-1">Attention as communion with Christ—practices and guidance.</p>
+      {/* Features */}
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <div className="grid gap-6 md:grid-cols-3">
+          {features.map((f) => (
+            <Link
+              to={f.to}
+              key={f.title}
+              className="group block overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+            >
+              <div className="aspect-video w-full overflow-hidden">
+                <img src={f.src} className="h-full w-full object-cover" alt={f.title} />
               </div>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* Topics */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="text-xl md:text-2xl font-semibold">Explore topics</h2>
-        <Separator className="my-6" />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <TopicCard
-            title="Faith & Reason"
-            imageKeyword="compass"
-            to="/topics/faith-and-reason"
-            topicKey="faith-and-reason"
-          />
-          <TopicCard
-            title="Ethics"
-            imageKeyword="scales"
-            to="/topics?topic=ethics"
-            topicKey="ethics"
-          />
-          <TopicCard
-            title="Metaphysics"
-            imageKeyword="galaxy"
-            to="/topics?topic=metaphysics"
-            topicKey="metaphysics"
-          />
-          <TopicCard
-            title="Theology"
-            imageKeyword="stained glass"
-            to="/topics/theology"
-            topicKey="theology"
-          />
+              <div className="p-5">
+                <h3 className="text-lg font-medium">{f.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
+                <span className="mt-4 inline-block text-sm font-medium text-primary group-hover:underline">
+                  Open
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
     </Layout>
