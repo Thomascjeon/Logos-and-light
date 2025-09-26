@@ -1,4 +1,4 @@
-/** 
+/**
  * scripts/build.mjs
  * Esbuild-based bundler for React + TypeScript app. Produces dist with hashed assets and HTML.
  * - Processes TS/TSX with JSX automatic runtime
@@ -36,7 +36,7 @@ function extractAssets(metafile) {
     const relFromRoot = relative(root, outPath) // e.g. dist/assets/index-XYZ.js
     const relFromDist = relFromRoot.replace(/^dist\//, '') // e.g. assets/index-XYZ.js
 
-    if (outPath.endsWith('.js') &amp;&amp; meta.entryPoint &amp;&amp; meta.entryPoint.endsWith('src/main.tsx')) {
+    if (outPath.endsWith('.js') && meta.entryPoint && meta.entryPoint.endsWith('src/main.tsx')) {
       result.js = relFromDist
     }
     if (outPath.endsWith('.css')) {
@@ -52,7 +52,7 @@ function extractAssets(metafile) {
  * @returns {string} HTML text
  */
 function makeHtml({ title, jsPath, cssPaths }) {
-  const cssLinks = cssPaths.map((href) =&gt; `    &lt;link rel="stylesheet" href="${href}" /&gt;`).join('\n')
+  const cssLinks = cssPaths.map((href) => `    &lt;link rel="stylesheet" href="${href}" /&gt;`).join('\n')
   return `&lt;!doctype html&gt;
 &lt;html lang="en" class="h-full"&gt;
   &lt;head&gt;
@@ -135,7 +135,7 @@ async function run() {
     console.log(`\nBuild complete in ${ms}ms\n`)
   } catch (err) {
     console.error('\nBuild failed.\n')
-    console.error(err &amp;&amp; err.message ? err.message : err)
+    console.error(err && err.message ? err.message : err)
     process.exit(1)
   }
 }
