@@ -1,4 +1,6 @@
 {
+  "type": "module",
+  // ... existing fields
   "name": "web-creator",
   "version": "1.0.0",
   "scripts": {
