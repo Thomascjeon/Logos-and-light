@@ -1,98 +1,143 @@
-/**
- * App.tsx
- * Main application providers and router. Uses React Router v7 data router (createHashRouter + RouterProvider),
- * theme provider, error boundary, and app-wide utilities.
+/** 
+ * scripts/build.mjs
+ * Esbuild-based bundler for React + TypeScript app. Produces dist with hashed assets and HTML.
+ * - Processes TS/TSX with JSX automatic runtime
+ * - Processes CSS via PostCSS/Tailwind through esbuild-style-plugin (if config exists)
+ * - Generates dist/index.html that links the emitted CSS and JS
+ * - IMPORTANT: Uses &lt;div id="app"&gt; to match src/main.tsx
  */
 
-import { useEffect, lazy, Suspense } from 'react'
-import { ThemeProvider } from 'next-themes'
-import { createHashRouter, RouterProvider } from 'react-router'
-import { UIPrefsProvider } from './contexts/UIPrefsContext'
-import { initRemoteImages } from './lib/remoteImages'
-import ConnectLinkCleanup from './components/ConnectLinkCleanup'
-import HeadSEO from './components/HeadSEO'
-import WWWEnforcer from './components/WWWEnforcer'
-import AdminGate from './components/AdminGate'
-import ErrorBoundary from './components/ErrorBoundary'
+import { fileURLToPath } from 'node:url'
+import { dirname, relative } from 'node:path'
+import fs from 'node:fs'
+import * as esbuild from 'esbuild'
+import { stylePlugin } from 'esbuild-style-plugin'
 
-/**
- * Lazy-loaded pages. Each is code-split to keep initial bundle small.
- */
-const HomePage = lazy(() => import('./pages/Home'))
-const ArticlesPage = lazy(() => import('./pages/Articles'))
-const ArticleDetailPage = lazy(() => import('./pages/ArticleDetail'))
-const TopicsPage = lazy(() => import('./pages/Topics'))
-const TopicDetailPage = lazy(() => import('./pages/TopicDetail'))
-const DailyPage = lazy(() => import('./pages/Daily'))
-const MindfulnessPage = lazy(() => import('./pages/Mindfulness'))
-const QuestionsPage = lazy(() => import('./pages/Questions'))
-const AboutPage = lazy(() => import('./pages/About'))
-const ResourcesPage = lazy(() => import('./pages/Resources'))
-const ImageryEditorPage = lazy(() => import('./pages/ImageryEditor'))
-const ContentEditorPage = lazy(() => import('./pages/ContentEditor'))
-const NotFoundPage = lazy(() => import('./pages/NotFound'))
+/** @type {string} Absolute path to repo root */
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const root = dirname(__dirname)
 
-/**
- * LoadingScreen
- * Accessible loading fallback during code-splitting.
- */
-function LoadingScreen() {
-  return (
-    <div className="min-h-[40vh] mx-auto max-w-2xl p-6 text-center flex items-center justify-center">
-      <div>
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-        <p className="mt-3 text-sm text-muted-foreground">Loading…</p>
-      </div>
-    </div>
-  )
+/** @returns {Promise&lt;void&gt;} Clean output directory */
+async function cleanDist() {
+  await fs.promises.rm(new URL('../dist/', import.meta.url), { recursive: true, force: true })
 }
 
 /**
- * Router configuration (hash-based).
- * Using the v7 data router API avoids compatibility issues with older Router components.
+ * Extract main JS and CSS files from esbuild metafile.
+ * @param {esbuild.Metafile} metafile - Build outputs metadata
+ * @returns {{ js:string, css:string[] }} Relative paths from dist to main JS and all CSS files
  */
-const router = createHashRouter([
-  { path: '/', element: <HomePage /> },
-  { path: '/articles', element: <ArticlesPage /> },
-  { path: '/articles/:id', element: <ArticleDetailPage /> },
-  { path: '/topics', element: <TopicsPage /> },
-  { path: '/topics/:topic', element: <TopicDetailPage /> },
-  { path: '/daily', element: <DailyPage /> },
-  { path: '/mindfulness', element: <MindfulnessPage /> },
-  { path: '/questions', element: <QuestionsPage /> },
-  { path: '/about', element: <AboutPage /> },
-  { path: '/resources', element: <ResourcesPage /> },
-  { path: '/imagery', element: <AdminGate><ImageryEditorPage /></AdminGate> },
-  { path: '/content', element: <AdminGate><ContentEditorPage /></AdminGate> },
-  { path: '*', element: <NotFoundPage /> },
-])
+function extractAssets(metafile) {
+  /** @type {{ js:string, css:string[] }} */
+  const result = { js: '', css: [] }
+
+  for (const [outPath, meta] of Object.entries(metafile.outputs)) {
+    const relFromRoot = relative(root, outPath) // e.g. dist/assets/index-XYZ.js
+    const relFromDist = relFromRoot.replace(/^dist\//, '') // e.g. assets/index-XYZ.js
+
+    if (outPath.endsWith('.js') &amp;&amp; meta.entryPoint &amp;&amp; meta.entryPoint.endsWith('src/main.tsx')) {
+      result.js = relFromDist
+    }
+    if (outPath.endsWith('.css')) {
+      result.css.push(relFromDist)
+    }
+  }
+  return result
+}
 
 /**
- * App
- * Wraps the app with UI/Theme providers, global utilities, and mounts the router.
+ * Generate HTML with linked assets.
+ * @param {{ title:string, jsPath:string, cssPaths:string[] }} param0
+ * @returns {string} HTML text
  */
-export default function App() {
-  // Initialize remote image loader once on mount (no-op if disabled).
-  useEffect(() => {
-    initRemoteImages()
-  }, [])
-
-  return (
-    <UIPrefsProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        {/* Global cleanup to remove the undesired "External" connect link */}
-        <ConnectLinkCleanup />
-        {/* SEO head tags for canonical and og:url using the configured base URL */}
-        <HeadSEO />
-        {/* Client-side safety net to force apex -> www canonical host */}
-        <WWWEnforcer />
-
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingScreen />}>
-            <RouterProvider router={router} />
-          </Suspense>
-        </ErrorBoundary>
-      </ThemeProvider>
-    </UIPrefsProvider>
-  )
+function makeHtml({ title, jsPath, cssPaths }) {
+  const cssLinks = cssPaths.map((href) =&gt; `    &lt;link rel="stylesheet" href="${href}" /&gt;`).join('\n')
+  return `&lt;!doctype html&gt;
+&lt;html lang="en" class="h-full"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+    &lt;meta name="theme-color" content="#0f172a" /&gt;
+    &lt;title&gt;${title}&lt;/title&gt;
+${cssLinks}
+  &lt;/head&gt;
+  &lt;body class="h-full bg-background text-foreground"&gt;
+    &lt;div id="app"&gt;&lt;/div&gt;
+    &lt;script type="module" src="${jsPath}" defer&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;`
 }
+
+/**
+ * Write HTML to dist/index.html
+ * @param {{ jsPath:string, cssPaths:string[] }} param0
+ * @returns {Promise&lt;void&gt;}
+ */
+async function writeHtml({ jsPath, cssPaths }) {
+  const title = 'Logos &amp; Light'
+  const html = makeHtml({ title, jsPath, cssPaths })
+  const distDir = new URL('../dist/', import.meta.url)
+  await fs.promises.mkdir(distDir, { recursive: true })
+  await fs.promises.writeFile(new URL('../dist/index.html', import.meta.url), html, 'utf8')
+}
+
+/** @returns {Promise&lt;void&gt;} Main build */
+async function run() {
+  const isProd = process.argv.includes('--production') || process.env.NODE_ENV === 'production'
+  const start = Date.now()
+  console.log(`\nBuilding (${isProd ? 'production' : 'development'})…\n`)
+
+  await cleanDist()
+
+  /** @type {esbuild.BuildOptions} */
+  const options = {
+    entryPoints: ['src/main.tsx'],
+    outdir: 'dist/assets',
+    bundle: true,
+    format: 'esm',
+    splitting: true,
+    platform: 'browser',
+    jsx: 'automatic',
+    sourcemap: isProd ? false : true,
+    minify: isProd,
+    target: ['es2020'],
+    entryNames: isProd ? '[dir]/[name]-[hash]' : '[dir]/[name]',
+    assetNames: isProd ? '[dir]/[name]-[hash]' : '[dir]/[name]',
+    chunkNames: isProd ? 'chunks/[name]-[hash]' : 'chunks/[name]',
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(isProd ? 'production' : 'development'),
+    },
+    loader: {
+      '.svg': 'file',
+      '.png': 'file',
+      '.jpg': 'file',
+      '.jpeg': 'file',
+      '.gif': 'file',
+      '.webp': 'file',
+    },
+    metafile: true,
+    plugins: [
+      // Enables PostCSS (and Tailwind if your postcss/tailwind configs exist)
+      stylePlugin({ postcss: true }),
+    ],
+    logLevel: 'info',
+  }
+
+  try {
+    const result = await esbuild.build(options)
+    const assets = extractAssets(result.metafile)
+    if (!assets.js) {
+      throw new Error('Failed to locate built JS for src/main.tsx')
+    }
+    await writeHtml({ jsPath: assets.js, cssPaths: assets.css })
+    const ms = Date.now() - start
+    console.log(`\nBuild complete in ${ms}ms\n`)
+  } catch (err) {
+    console.error('\nBuild failed.\n')
+    console.error(err &amp;&amp; err.message ? err.message : err)
+    process.exit(1)
+  }
+}
+
+run()
